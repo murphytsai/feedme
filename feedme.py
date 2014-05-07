@@ -20,7 +20,6 @@ for _entry in d.entries:
     _page_link = _entry.link
     #print 'open: ', _page_link
     print 'title: ', _entry.title
-    time.sleep(1)
     continue
     _page_html = _retrieve_content(_page_link)
     soup = BeautifulSoup(_page_html)
