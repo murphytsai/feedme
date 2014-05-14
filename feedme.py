@@ -34,7 +34,7 @@ def _convert_short_to_ori_url(short_url):
 
 def _retrieve_and_span_link(indent, page_link):
     if page_link in ignore_urls:
-        break
+        return    
 
     _indent = '%s    '%indent
     print '%s[%s]'%(_indent, page_link)
