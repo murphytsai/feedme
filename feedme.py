@@ -17,7 +17,8 @@ def _convert_short_to_ori_url(short_url):
     ori_url=short_url
     try:
         if short_url in ignore_urls:
-            return '[i]:%s'%ori_url   
+            #return '[i]:%s'%ori_url   
+            return ori_url   
         request = urllib2.urlopen(urllib2.Request(url=short_url, headers = {'User-Agent':'Mozilla/8.0 (compatible; MSIE 8.0; Windows 7)'}))
         socket.setdefaulttimeout(5)
         ori_url = request.url
@@ -32,8 +33,8 @@ def _convert_short_to_ori_url(short_url):
         #print short_url, 'no change'
         return '[=]:%s'%ori_url   
 
-def _retrieve_and_span_link(indent, page_link):
-    if page_link in ignore_urls:
+def _retrieve_and_span_link(level, indent, page_link):
+    if level > 1 or page_link in ignore_urls or page_link in spanned_urls_list:
         return    
 
     _indent = '%s    '%indent
@@ -45,11 +46,10 @@ def _retrieve_and_span_link(indent, page_link):
         _link = link.get('href')
         if _link and (_link.lower().startswith("http") or _link.lower().startswith("https")):
             _ori_url = _convert_short_to_ori_url(_link)
-            print '%s[%s]'%(_indent, _ori_url)
             if page_link == _ori_url or _ori_url in spanned_urls_list:
                 continue
-            
-            _retrieve_and_span_link(_indent, _ori_url)
+            #print '%s[%s]'%(_indent, _ori_url)
+            _retrieve_and_span_link(level+1, _indent, _ori_url)
             if _link and (_link.lower().endswith(".jpg") or _link.lower().endswith(".png") or _link.lower().endswith(".bmp")):
                 photo_link_list.append(_link)
 
@@ -67,7 +67,8 @@ for _entry in d.entries:
     #continue
     _indent="    "
     spanned_urls_list=[]
-    _retrieve_and_span_link(_indent, _page_link)
+    level=0
+    _retrieve_and_span_link(level, _indent, _page_link)
 
 #photo_link_list.append("http://www.taaze.tw/new_include/images/logo.jpg")
 for pl in photo_link_list:
