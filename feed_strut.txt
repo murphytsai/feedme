@@ -1,0 +1,31 @@
+{
+'updated_parsed': time.struct_time(tm_year=2014, tm_mon=6, tm_mday=6, tm_hour=15, tm_min=59, tm_sec=25, tm_wday=4, tm_yday=157, tm_isdst=0), 
+
+'updated': u'2014-06-06T15:59:25Z', 
+
+'published_parsed': time.struct_time(tm_year=2014, tm_mon=6, tm_mday=6, tm_hour=15, tm_min=59, tm_sec=3, tm_wday=4, tm_yday=157, tm_isdst=0), 
+
+'links': [{'href': u'http://www.ptt.cc/bbs/BuyTogether/M.1402041543.A.F70.html', 'type': u'text/html', 'rel': u'alternate'}],
+
+'title': u'[\u98df\u7269] \u725b\u5976\u8207\u96de\u86cb\u704c\u6e89\u7684\u8461\u8404-\u53f0\u4e2d', 
+
+'author': u'fightinheart', 
+
+'summary': u'<pre>\n(1)\u8cfc\u8cb7\u7269\u54c1\u4ecb\u7d39\u3001\u7db2\u5740\uff1a\n\n  https://www.facebook.com/heartgrape\n  \u4e00\u7bb1350 \u56db\u7bb1\u514d\u904b  6/15\u5230\u8ca8</pre>', 
+
+'content': [{'base': u'http://rss.ptt.cc/BuyTogether.xml', 'type': u'text/html', 'value': u'<pre>\n(1)\u8cfc\u8cb7\u7269\u54c1\u4ecb\u7d39\u3001\u7db2\u5740\uff1a\n\n  https://www.facebook.com/heartgrape\n  \u4e00\u7bb1350 \u56db\u7bb1\u514d\u904b  6/15\u5230\u8ca8</pre>', 'language': u'zh-tw'}], 
+
+'guidislink': True, 
+
+'title_detail': {'base': u'http://rss.ptt.cc/BuyTogether.xml', 'type': u'text/plain', 'value': u'[\u98df\u7269] \u725b\u5976\u8207\u96de\u86cb\u704c\u6e89\u7684\u8461\u8404-\u53f0\u4e2d', 'language': u'zh-tw'}, 
+
+'link': u'http://www.ptt.cc/bbs/BuyTogether/M.1402041543.A.F70.html', 
+
+'authors': [{'name': u'fightinheart'}], 
+
+'author_detail': {'name': u'fightinheart'}, 
+
+'id': u'http://www.ptt.cc/bbs/BuyTogether/M.1402041543.A.F70.html', 
+
+'published': u'2014-06-06T15:59:03Z'
+}

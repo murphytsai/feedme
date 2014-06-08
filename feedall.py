@@ -24,7 +24,7 @@ def util_perf_analyze_log(log):
 
 def _retrieve_content(link):
     _start=time.time()
-    _page_file = urllib2.urlopen(_page_link)
+    _page_file = urllib2.urlopen(link)
     _page_html = _page_file.read()
     _page_file.close()
     _end=time.time()
@@ -75,12 +75,13 @@ def _retrieve_and_span_link(level, indent, page_link, collect):
     for link in soup.findAll('a', href=True):
         #_link = link.get('href')
         _link = link['href']
-        if _link and (_link.lower().startswith("http") or _link.lower().startswith("https")):
+        if _link and (_link.lower().startswith("http") or _link.lower().startswith("https") or
+            (_link.startswith("/bbs/BuyTogether/") and not _link.startswith("/bbs/BuyTogether/index"))):
             _err, _ori_url = _convert_short_to_ori_url(_link)
             if page_link == _ori_url or _ori_url in spanned_urls_list:
                 #print 'skip link:%s'%(_ori_url)
                 continue
-            #print '%s[%s]'%(_indent, _ori_url)
+            print '%s[%s]'%(_indent, _ori_url)
             spanned_urls_list.append(_ori_url)
             _retrieve_and_span_link(level+1, _indent, _ori_url, collect)
             collect.append(_ori_url)
@@ -100,13 +101,30 @@ photo_link_list = []
 site="rocksaying"
 site="buytogether"
 #site="macshop"
-d=feedparser.parse(CONFIG_FEEDS_URL[site])
-#print d.entries[0].title
+#d=feedparser.parse(CONFIG_FEEDS_URL[site])
+_indent="    "
+link_dict={}
+link_dict["inside_links"]=[]
+spanned_urls_list=ignore_urls
+_page_link=r'http://www.ptt.cc/bbs/BuyTogether/index%d.html'
+#_page_link='http://www.ptt.cc/bbs/BuyTogether/index2570.html'
+level=0
+all_urls = []
+for _index in xrange(2570,2568,-1):
+    _site_url=_page_link%_index
+    _retrieve_and_span_link(level, _indent, _site_url, link_dict["inside_links"])
+    all_urls += link_dict["inside_links"]
+    link_dict["inside_links"] = []
+    time.sleep(1)
+
 link_collect=[]
 with open('%s.csv'%site, 'awb') as _csv:
     _csv_writer = csv.writer(_csv)
-    for _entry in d.entries:
+    for _entry in all_urls:
         link_dict={}
+        ptt_site="http://www.ptt.cc"
+        link_dict["title_link"]=ptt_site+_entry
+        """
         link_dict["published"]=_entry.published
         link_dict["author"]=_entry.author
         _title = _entry.title
@@ -127,9 +145,9 @@ with open('%s.csv'%site, 'awb') as _csv:
         link_dict["title_subtitle"]=_title_subtitle.strip()
         link_dict["title_how"]=_title_how.strip()
         link_dict["title_link"]=_entry.link
-        _page_link = _entry.link
+        """
+        _page_link = link_dict["title_link"]
         #print 'open: ', _page_link
-        print 'title: ', _entry.title
         #continue
         _indent="    "
         spanned_urls_list=ignore_urls
@@ -139,14 +157,14 @@ with open('%s.csv'%site, 'awb') as _csv:
         #print link_dict["inside_links"]
         #_row = '%s , %s , %s\n'%(link_dict["title_name"],link_dict["title_link"],' , '.join(link_dict["inside_links"]))
         _row=[]
-        _row.append(link_dict["published"])
+        #_row.append(link_dict["published"])
         _row.append(link_dict["cnt_push_tag"])
-        _row.append(link_dict["author"])
+        #_row.append(link_dict["author"])
         #_row.append(link_dict["title_name"].encode('big5'))
-        _row.append(link_dict["title_title"].encode('big5'))
-        _row.append(link_dict["title_type"].encode('big5'))
-        _row.append(link_dict["title_subtitle"].encode('big5'))
-        _row.append(link_dict["title_how"].encode('big5'))
+        #_row.append(link_dict["title_title"].encode('big5'))
+        #_row.append(link_dict["title_type"].encode('big5'))
+        #_row.append(link_dict["title_subtitle"].encode('big5'))
+        #_row.append(link_dict["title_how"].encode('big5'))
         _row.append(link_dict["title_link"].encode('utf-8'))
         _site_set=set()
         for _lnk in link_dict["inside_links"]:
@@ -163,5 +181,4 @@ for pl in photo_link_list:
     _filename = pl.split('/')[-1]
     #urllib.urlretrieve(pl, _filename)
 print "Done"
-
-
+    
