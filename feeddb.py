@@ -108,7 +108,7 @@ def _get_il_page_info(page_link, skip_urls):
 def _db_insert_one_post(author,date,title,source,content,links):
     try:
         _sql="INSERT INTO posts (pid, author, postdate, title, source, content, links)values(null, ?,?,?,?,?,?)"
-        DB='feed.db'
+        DB='db.sqlite'
         conn=sqlite3.connect(DB)
         conn.text_factory = str
         c = conn.cursor()
@@ -131,16 +131,29 @@ c.execute('''create table if not exists posts
     (pid INTEGER , author text, postdate text, title text, source text PRIMARY KEY, content text, links text)''')
 conn.commit()
 conn.close()
+
+conn=sqlite3.connect(DB)
+c = conn.cursor()
+c.execute('select source from posts')
+_processed_urls=[]
+for _s in c:
+    _processed_urls.append(_s[0])
+conn.commit()
+conn.close()
 _page_link=r'http://www.ptt.cc/bbs/BuyTogether/index%d.html'
 ignore_urls=["http://www.ptt.cc/"]
 ptt_site="http://www.ptt.cc"
-for _index in xrange(2500,2400,-1):
+ignore_urls+=_processed_urls
+for _index in xrange(2500,2498,-1):
     _site_url=_page_link%_index
     print 'process ', _site_url
     _page_info=_get_page_info(_site_url, ignore_urls)
     for _source, _urls in _page_info.iteritems():
         _ptt_site_urls=[ ptt_site + _u for _u in _urls['inside_links']]
         for _il in _ptt_site_urls:
+            if _il in ignore_urls:
+                print '--> processed & pass',_il  
+                continue
             _il_page_info=_get_il_page_info(_il, ignore_urls)
             time.sleep(1)
             for _il_source, _il_value in _il_page_info.iteritems():
@@ -153,7 +166,7 @@ for _index in xrange(2500,2400,-1):
                 _l=','.join(_il_value['inside_links'])
                 _c=_il_value['content']
                 _db_insert_one_post(_a,_d,_t,_s,_c,_l)
-                time.sleep(4)
+                #time.sleep(4)
         
 
 
