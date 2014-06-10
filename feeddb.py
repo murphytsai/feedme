@@ -134,7 +134,7 @@ conn.close()
 _page_link=r'http://www.ptt.cc/bbs/BuyTogether/index%d.html'
 ignore_urls=["http://www.ptt.cc/"]
 ptt_site="http://www.ptt.cc"
-for _index in xrange(2514,2500,-1):
+for _index in xrange(2500,2400,-1):
     _site_url=_page_link%_index
     print 'process ', _site_url
     _page_info=_get_page_info(_site_url, ignore_urls)
@@ -153,7 +153,7 @@ for _index in xrange(2514,2500,-1):
                 _l=','.join(_il_value['inside_links'])
                 _c=_il_value['content']
                 _db_insert_one_post(_a,_d,_t,_s,_c,_l)
-                time.sleep(1)
+                time.sleep(4)
         
 
 
