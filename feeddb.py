@@ -124,7 +124,7 @@ def _db_insert_one_post(author,date,title,source,content,links):
         print 'pass ', source
         pass
 
-DB='feed.db'
+DB='db.sqlite'
 conn=sqlite3.connect(DB)
 c = conn.cursor()
 c.execute('''create table if not exists posts 
