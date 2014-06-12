@@ -13,6 +13,8 @@ import re
 
 import sqlite3
 
+photo_link_list=[]
+
 def _convert_short_to_ori_url(short_url):
     ori_url=short_url
     try:
@@ -35,7 +37,7 @@ def _convert_short_to_ori_url(short_url):
 
 def _retrieve_content(link):
     _start=time.time()
-    _page_file = urllib2.urlopen(link)
+    _page_file = urllib2.urlopen(urllib2.Request(url=link, headers = {'User-Agent':'Mozilla/8.0 (compatible; MSIE 8.0; Windows 7)'}))
     _page_html = _page_file.read().decode('utf-8')
     _page_file.close()
     _end=time.time()
@@ -144,7 +146,7 @@ _page_link=r'http://www.ptt.cc/bbs/BuyTogether/index%d.html'
 ignore_urls=["http://www.ptt.cc/"]
 ptt_site="http://www.ptt.cc"
 ignore_urls+=_processed_urls
-for _index in xrange(2537,2500,-1):
+for _index in xrange(2546,2500,-1):
     _site_url=_page_link%_index
     print 'process ', _site_url
     _page_info=_get_page_info(_site_url, ignore_urls)
