@@ -10,10 +10,16 @@ import datetime
 import socket
 import csv
 import re
-
+import random
 import sqlite3
 
 photo_link_list=[]
+
+def _random_sleep():
+    _time=random.randrange(1, 20, 5)
+    print 'ready to sleep: %d sec'%_time
+    time.sleep(_time)
+    print 'finish sleeping'
 
 def _convert_short_to_ori_url(short_url):
     ori_url=short_url
@@ -36,13 +42,19 @@ def _convert_short_to_ori_url(short_url):
         return -1, ori_url
 
 def _retrieve_content(link):
-    _start=time.time()
-    _page_file = urllib2.urlopen(urllib2.Request(url=link, headers = {'User-Agent':'Mozilla/8.0 (compatible; MSIE 8.0; Windows 7)'}))
-    _page_html = _page_file.read().decode('utf-8')
-    _page_file.close()
-    _end=time.time()
-    print 'download link:%s cost=%f'%(link, _end-_start)
-    return _page_html
+    while 1:
+        _start=time.time()
+        try:
+            _page_file = urllib2.urlopen(urllib2.Request(url=link, headers = {'User-Agent':'Mozilla/8.0 (compatible; MSIE 8.0; Windows 7)'}))
+        except:
+            print '2 sleep'
+            _random_sleep()
+            continue
+        _page_html = _page_file.read().decode('utf-8')
+        _page_file.close()
+        _end=time.time()
+        print 'download link:%s cost=%f'%(link, _end-_start)
+        return _page_html
 
 def _get_page_info(page_link, skip_urls):
     _page={}
@@ -146,7 +158,7 @@ _page_link=r'http://www.ptt.cc/bbs/BuyTogether/index%d.html'
 ignore_urls=["http://www.ptt.cc/"]
 ptt_site="http://www.ptt.cc"
 ignore_urls+=_processed_urls
-for _index in xrange(2546,2500,-1):
+for _index in xrange(2565,2500,-1):
     _site_url=_page_link%_index
     print 'process ', _site_url
     _page_info=_get_page_info(_site_url, ignore_urls)
@@ -157,7 +169,7 @@ for _index in xrange(2546,2500,-1):
                 print '--> processed & pass',_il  
                 continue
             _il_page_info=_get_il_page_info(_il, ignore_urls)
-            time.sleep(1)
+            _random_sleep()
             for _il_source, _il_value in _il_page_info.iteritems():
                 #print _il_value['content']
                 #print _il_source, _il_value['author'], _il_value['post_date'], _il_value['title'], ','.join(_il_value['inside_links'])
@@ -168,7 +180,7 @@ for _index in xrange(2546,2500,-1):
                 _l=','.join(_il_value['inside_links'])
                 _c=_il_value['content']
                 _db_insert_one_post(_a,_d,_t,_s,_c,_l)
-                time.sleep(5)
+                _random_sleep()
         
 
 
