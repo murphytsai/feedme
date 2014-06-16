@@ -14,7 +14,7 @@ import re
 import sqlite3
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger( __name__ )
 
 
@@ -56,7 +56,12 @@ with open('%s.csv'%site, 'wb') as _csv:
         except:
             _title_type = ""
         try:
-            _title_subtitle = _title_split.group(2).strip()
+            if _title_split.group(2):
+                _title_subtitle = _title_split.group(2).strip().encode('big5')
+            else:
+                _title_subtitle=""
+        except UnicodeEncodeError:
+            _title_subtitle = _title_split.group(2).strip().encode('utf8')
         except:
             _title_subtitle = ""
         try:
@@ -79,11 +84,11 @@ with open('%s.csv'%site, 'wb') as _csv:
         _row.append(_date)
         _row.append(_author)
         _row.append(_title_type.encode('big5'))
-        _row.append(_title_subtitle.encode('big5'))
+        _row.append(_title_subtitle)
         _row.append(_title_how.encode('big5'))
         _row.append(get_push_cnt(_p[5]))
         _row.append(_p[3].strip().encode('big5'))
-        _row.append(_p[4].strip().encode('big5'))
+        _row.append(_p[4].strip().encode('utf-8'))
         _csv_writer.writerow(_row)	
         scanlog['parse_end']=time.time()
         util_perf_analyze_log(scanlog)
