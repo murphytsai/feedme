@@ -22,13 +22,21 @@ def util_perf_analyze_log(log):
         else:
             continue
 
+def get_links_from_content(content):
+    soup = BeautifulSoup(content)
+    links_list=[]
+    for link in soup.findAll('a', href=True):
+        _link = link['href']
+        links_list.append(_link)
+    return links_list
+
 def retrieve_content(link):
     _start=time.time()
     _page_file = urllib2.urlopen(link)
     _page_html = _page_file.read()
     _page_file.close()
     _end=time.time()
-    print 'download link:%s cost=%f'%(link, _end-_start)
+    logger.info('download link:%s cost=%f'%(link, _end-_start))
     return _page_html
 
 def convert_short_to_ori_url(short_url):

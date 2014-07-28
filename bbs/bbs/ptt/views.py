@@ -2,7 +2,6 @@ from models import *
 import feedparser
 import urllib2
 import urlparse
-from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 import time
 import socket
@@ -13,13 +12,14 @@ import json
 import sqlite3
 import logging
 import util
+import os
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.error)
 logger = logging.getLogger( __name__ )
 ignore_urls=["http://www.ptt.cc/"]
 google_api=r'https://www.googleapis.com/urlshortener/v1/url?shortUrl={0}&projection=FULL'
 scanlog={}
-DB='/Volumes/MurphyHD/Users/momo/Code/github/feedme/bbs/bbs/ptt/db.sqlite'
+DB=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../db.sqlite')
 conn=sqlite3.connect(DB)
 c = conn.cursor()
 c.execute('select author, postdate, title, source, content, links from posts')
@@ -40,14 +40,10 @@ for _p in _all_posts:
             _db_author = Author()
             _db_author.idname = author
             _db_author.save()
-            print 'new Author %s is created' % author
+            logger.info('new Author %s is created' % author)
 
         _db_content=_p[4]
-        soup = BeautifulSoup(_db_content)
-        links_list=[]
-        for link in soup.findAll('a', href=True):
-            _link = link['href']
-            links_list.append(_link)
+        links_list = util.get_links_from_content(_db_content)
         db_link_list=[]
         for link in links_list:
             _db_link = Link.objects.filter(short_link=link)
@@ -62,8 +58,8 @@ for _p in _all_posts:
                     clicks = google_url_stats['analytics']['allTime']['longUrlClicks']
                     _db_link.click_counter=clicks
                 _db_link.save()
-                print 'new Link %s is created' % _db_link
-                db_link_list.append(_db_link)
+                logger.info('new Link %s is created' % _db_link)
+            db_link_list.append(_db_link)
 
         post = Post()
         db_posttime = _p[1]
@@ -79,10 +75,15 @@ for _p in _all_posts:
             post.links.add(_dl)
         post.save()
         count += 1
+        logger.info('[%d] record is added'%count)
         # if count >5:
         #     break
     #posts=Post.objects.all()
     #print posts
     except:
-        print 'failed !'
-        print _p
+        logger.error('failed !------------------------------')
+        logger.error(_p[0])
+        logger.error(_p[1])
+        logger.error(_p[2])
+        logger.error(_p[3])
+        logger.error('failed !++++++++++++++++++++++++++++++')
