@@ -81,6 +81,8 @@ class ImportOldDB(TestCase):
                     _db_author.idname = author
                     _db_author.save()
                     print 'new Author %s is created' % author
+                else:
+                    _db_author=_db_author[0]
 
                 links=_p[5]
                 links_list = links.split(',')
@@ -99,7 +101,10 @@ class ImportOldDB(TestCase):
                             _db_link.click_counter=clicks
                         _db_link.save()
                         print 'new Link %s is created' % _db_link
-                        db_link_list.append(_db_link)
+                    else:
+                        _db_link=_db_link[0]
+                        print 'Link %s is existed!' % _db_link
+                    db_link_list.append(_db_link)
 
                 post = Post()
                 db_posttime = _p[1]

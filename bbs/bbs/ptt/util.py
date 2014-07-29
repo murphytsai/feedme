@@ -10,7 +10,10 @@ import datetime
 import socket
 import csv
 import re
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger( __name__ )
 ignore_urls=["http://www.ptt.cc/"]
 
 def util_perf_analyze_log(log):

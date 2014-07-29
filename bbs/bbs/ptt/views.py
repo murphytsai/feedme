@@ -12,9 +12,9 @@ import json
 import sqlite3
 import logging
 import util
-import os
+import os, sys
 
-logging.basicConfig(level=logging.error)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger( __name__ )
 ignore_urls=["http://www.ptt.cc/"]
 google_api=r'https://www.googleapis.com/urlshortener/v1/url?shortUrl={0}&projection=FULL'
@@ -28,6 +28,7 @@ conn.commit()
 conn.close()
 all_urls=[]
 count=0
+failed=0
 for _p in _all_posts:
     try:
         author=_p[0]
@@ -41,12 +42,17 @@ for _p in _all_posts:
             _db_author.idname = author
             _db_author.save()
             logger.info('new Author %s is created' % author)
+        else:
+            _db_author=_db_author[0]
 
         _db_content=_p[4]
         links_list = util.get_links_from_content(_db_content)
         db_link_list=[]
         for link in links_list:
+            if link in ignore_urls or (not link.startswith('http') and not link.startswith('https')):
+                continue
             _db_link = Link.objects.filter(short_link=link)
+            logger.info('process link :%s'%link)
             if not _db_link:
                 _db_link = Link(short_link=link)
                 _err, _ori_url = util.convert_short_to_ori_url(link)
@@ -59,6 +65,9 @@ for _p in _all_posts:
                     _db_link.click_counter=clicks
                 _db_link.save()
                 logger.info('new Link %s is created' % _db_link)
+            else:
+                _db_link=_db_link[0]
+                logger.info('Link %s is existed!' % _db_link)
             db_link_list.append(_db_link)
 
         post = Post()
@@ -80,10 +89,20 @@ for _p in _all_posts:
         #     break
     #posts=Post.objects.all()
     #print posts
-    except:
-        logger.error('failed !------------------------------')
-        logger.error(_p[0])
-        logger.error(_p[1])
-        logger.error(_p[2])
-        logger.error(_p[3])
-        logger.error('failed !++++++++++++++++++++++++++++++')
+    except Exception as e:
+        failed+=1
+        print 'failed !------------------------------'
+        print str(e)
+        print _p[0]
+        print _p[1]
+        print _p[2]
+        print _p[3]
+        print 'failed !++++++++++++++++++++++++++++++'
+        # logger.error('failed !------------------------------')
+        # logger.error(_p[0])
+        # logger.error(_p[1])
+        # logger.error(_p[2])
+        # logger.error(_p[3])
+        # logger.error('failed !++++++++++++++++++++++++++++++')
+
+print 'Total Failed: %d' % failed
