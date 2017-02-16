@@ -14,13 +14,13 @@ import random
 import sqlite3
 import logging
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger( __file__)
 
 photo_link_list=[]
 
 def _random_sleep():
-    _time=random.randrange(1, 20, 5)
+    _time=random.randrange(1, 11, 2)
     logger.info('ready to sleep: %d sec'%_time)
     time.sleep(_time)
     logger.info('finish sleeping')
@@ -49,7 +49,8 @@ def _retrieve_content(link):
     while 1:
         _start=time.time()
         try:
-            _page_file = urllib2.urlopen(urllib2.Request(url=link, headers = {'User-Agent':'Mozilla/8.0 (compatible; MSIE 8.0; Windows 7)'}))
+            _page_file = None
+            _page_file = urllib2.urlopen(urllib2.Request(url=link, headers = {'User-Agent':'Mozilla/8.0 (compatible; MSIE 8.0; Windows 7)'}), timeout=4)
         except urllib2.HTTPError, e:
             logger.warning(e)
             if e.code == 500 or e.code==503:
@@ -58,11 +59,21 @@ def _retrieve_content(link):
                 continue
             elif e.code == 404:
                 logger.warning(link + ' 404 not found.')
+                if _page_file:
+                    _page_file.close()
                 return None
         except urllib2.URLError, e:
             logger.warning(e)
             logger.warning(e.reason)
-            logger.warning('sleep '+link)
+            logger.warning('failed: '+link)
+            if _page_file:
+                _page_file.close()
+            return None
+        except Exception, e:
+            logger.warning(e)
+            logger.warning('failed: '+link)
+            if _page_file:
+                _page_file.close()
             return None
         else:
             _page_html = _page_file.read().decode('utf-8')
@@ -179,7 +190,7 @@ _page_link=r'http://www.ptt.cc/bbs/BuyTogether/index%d.html'
 ignore_urls=["http://www.ptt.cc/"]
 ptt_site="http://www.ptt.cc"
 ignore_urls+=_processed_urls
-for _index in xrange(2577,2500,-1):
+for _index in xrange(3553,2500,-1):
     _site_url=_page_link%_index
     logger.info('process '+ _site_url)
     _page_info=_get_page_info(_site_url, ignore_urls)
@@ -189,7 +200,7 @@ for _index in xrange(2577,2500,-1):
         _ptt_site_urls=[ ptt_site + _u for _u in _urls['inside_links']]
         for _il in _ptt_site_urls:
             if _il in ignore_urls:
-                logger.info('--> processed & pass' +_il) 
+                logger.info('--> processed & passed ' +_il) 
                 continue
             _il_page_info=_get_il_page_info(_il, ignore_urls)
             if not _il_page_info:

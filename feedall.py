@@ -23,13 +23,21 @@ def util_perf_analyze_log(log):
             continue
 
 def _retrieve_content(link):
-    _start=time.time()
-    _page_file = urllib2.urlopen(link)
-    _page_html = _page_file.read()
-    _page_file.close()
-    _end=time.time()
-    print 'download link:%s cost=%f'%(link, _end-_start)
-    return _page_html
+    try:
+        _start=time.time()
+        _page_file = urllib2.urlopen(urllib2.Request(url=link, headers = {'User-Agent':'Mozilla/8.0 (compatible; MSIE 8.0; Windows 7)'}))
+        _page_html = _page_file.read()
+        _page_file.close()
+        _end=time.time()
+        print 'download link:%s cost=%f'%(link, _end-_start)
+        return _page_html
+    except IOError, e:
+        if hasattr(e, 'code'): # HTTPError
+            print 'http error code: ', e.code
+        elif hasattr(e, 'reason'): # URLError
+            print "can't connect, reason: ",e.reason
+        else:
+            raise
 
 def _convert_short_to_ori_url(short_url):
     ori_url=short_url

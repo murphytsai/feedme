@@ -62,7 +62,7 @@ class ImportOldDB(TestCase):
         ignore_urls=["http://www.ptt.cc/"]
         google_api=r'https://www.googleapis.com/urlshortener/v1/url?shortUrl={0}&projection=FULL'
         scanlog={}
-        DB='/Volumes/MurphyHD/Users/momo/Code/github/feedme/bbs/bbs/ptt/db.sqlite'
+        DB='/Users/momo/Code/github/feedme/bbs/bbs/db.sqlite'
         conn=sqlite3.connect(DB)
         c = conn.cursor()
         c.execute('select author, postdate, title, source, content, links from posts')
