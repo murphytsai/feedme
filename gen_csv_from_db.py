@@ -13,7 +13,7 @@ import re
 
 import sqlite3
 import logging
-
+import argparse
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger( __name__ )
@@ -90,14 +90,29 @@ def gen_csv_from_db(db_path, output_name):
             _row.append(get_push_cnt(_p[5]))
             _row.append(_p[3].strip().encode('big5'))
             _row.append(_p[4].strip().encode('utf-8'))
-            _csv_writer.writerow(_row)	
+            _csv_writer.writerow(_row)
             scanlog['parse_end']=time.time()
             util_perf_analyze_log(scanlog)
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
-        db_path = sys.argv[1]
-        output_name = sys.argv[2]
-        gen_csv_from_db(db_path, output_name)
+    parser = argparse.ArgumentParser(prog='gen_csv_from_db', description="generate csv by sqlite db")
+    parser.add_argument('--log-lvl', '--lvl', help="change log verbosity", dest="loglevel", choices=["DEBUG","INFO","WARNING","ERROR"], default="WARNING")
+    parser.add_argument('-i', '--input', dest='db_path', help="/from/to/sqlite.db", default="db.sqlite")
+    parser.add_argument('-o', '--output', dest='output_name', help="/from/to/output_name", default="db.csv")
+    args=parser.parse_args()
+
+    loglevel=logging.WARNING
+    if args.loglevel=="ERROR":
+        loglevel=logging.ERROR
+    elif args.loglevel=="DEBUG":
+        loglevel=logging.DEBUG
+    elif args.loglevel=="INFO":
+        loglevel=logging.INFO
     else:
-        print "python gen_csv_from_db.py <db_path> <output>"
+        loglevel=logging.WARNING
+    logging.basicConfig(format='%(asctime)-15s - %(levelname)-5s - %(message)s')
+    logging.getLogger().setLevel(loglevel)
+
+    db_path = args.db_path
+    output_name = args.output_name
+    gen_csv_from_db(db_path, output_name)
