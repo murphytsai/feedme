@@ -1,22 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import urllib2
-import urlparse
 from BeautifulSoup import BeautifulSoup
 
-import sys
 import time
-import datetime
-import socket
 import csv
 import re
 
 import sqlite3
 import logging
 import argparse
+from termcolor import colored
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger( __name__ )
+
+class style:
+    BOLD = '\033[1m'
+    END = '\033[0m'
 
 
 def util_perf_analyze_log(log):
@@ -115,4 +115,6 @@ if __name__ == "__main__":
 
     db_path = args.db_path
     output_name = args.output_name
+    print colored(style.BOLD + 'db_path=%s' + style.END, 'green') % db_path
+    print colored(style.BOLD + 'output_name=%s' + style.END, 'red') % output_name
     gen_csv_from_db(db_path, output_name)
