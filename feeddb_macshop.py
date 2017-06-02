@@ -1,15 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import feedparser
+import sys
 import urllib2
-import urlparse
 from BeautifulSoup import BeautifulSoup
 
 import time
-import datetime
 import socket
-import csv
-import re
 import random
 import sqlite3
 import logging
@@ -18,6 +14,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger( __file__)
 
 photo_link_list=[]
+ignore_urls=[]
 
 def _random_sleep():
     _time=random.randrange(1, 11, 2)
@@ -171,53 +168,72 @@ def _db_insert_one_post(author,date,title,source,content,links):
         logger.info('pass '+ source)
         pass
 
-DB='db.sqlite'
-conn=sqlite3.connect(DB)
-c = conn.cursor()
-c.execute('''create table if not exists posts 
-    (pid INTEGER , author text, postdate text, title text, source text PRIMARY KEY, content text, links text)''')
-conn.commit()
-conn.close()
 
-conn=sqlite3.connect(DB)
-c = conn.cursor()
-c.execute('select source from posts')
-_processed_urls=[]
-for _s in c:
-    _processed_urls.append(_s[0])
-conn.commit()
-conn.close()
-#_page_link=r'http://www.ptt.cc/bbs/MacShop/index%d.html'
-_page_link=r'https://www.ptt.cc/bbs/MacShop/index%d.html'
-ignore_urls=["https://www.ptt.cc/"]
-ptt_site="https://www.ptt.cc"
-ignore_urls+=_processed_urls
-for _index in xrange(8165,8164,-1):
-    _site_url=_page_link%_index
-    logger.info('process '+ _site_url)
-    _page_info=_get_page_info(_site_url, ignore_urls)
-    if not _page_info:
-        continue
-    for _source, _urls in _page_info.iteritems():
-        _ptt_site_urls=[ ptt_site + _u for _u in _urls['inside_links']]
-        for _il in _ptt_site_urls:
-            if _il in ignore_urls:
-                logger.info('--> processed & passed ' +_il) 
-                continue
-            _il_page_info=_get_il_page_info(_il, ignore_urls)
-            if not _il_page_info:
-                continue
-            _random_sleep()
-            for _il_source, _il_value in _il_page_info.iteritems():
-                #print _il_value['content']
-                #print _il_source, _il_value['author'], _il_value['post_date'], _il_value['title'], ','.join(_il_value['inside_links'])
-                logger.info(_il_source)
-                _a=_il_value['author']
-                _s=_il_source
-                _d=_il_value['post_date']
-                _t=_il_value['title']
-                _l=','.join(_il_value['inside_links'])
-                _c=_il_value['content']
-                _db_insert_one_post(_a,_d,_t,_s,_c,_l)
+def dbutil_setup_db(db_name="db.sqlite"):
+    DB=db_name
+    conn=sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute('''create table if not exists posts 
+              (pid INTEGER , author text, postdate text, title text, source text PRIMARY KEY, content text, links text)''')
+    conn.commit()
+    conn.close()
+
+def dbutil_get_processed_url_list(db_name="db.sqlite"):
+    conn=sqlite3.connect(db_name)
+    c = conn.cursor()
+    c.execute('select source from posts')
+    _processed_urls=[]
+    for _s in c:
+        _processed_urls.append(_s[0])
+        conn.commit()
+        conn.close()
+    return _processed_urls
+
+def crawler_task_start(ignored=[]):
+    #_page_link=r'http://www.ptt.cc/bbs/MacShop/index%d.html'
+    _page_link=r'https://www.ptt.cc/bbs/MacShop/index%d.html'
+    ignore_urls=["https://www.ptt.cc/"]
+    ptt_site="https://www.ptt.cc"
+    ignore_urls+=ignored
+    for _index in xrange(8165,8164,-1):
+        _site_url=_page_link%_index
+        logger.info('process '+ _site_url)
+        _page_info=_get_page_info(_site_url, ignore_urls)
+        if not _page_info:
+            continue
+        for _source, _urls in _page_info.iteritems():
+            _ptt_site_urls=[ ptt_site + _u for _u in _urls['inside_links']]
+            for _il in _ptt_site_urls:
+                if _il in ignore_urls:
+                    logger.info('--> processed & passed ' +_il) 
+                    continue
+                _il_page_info=_get_il_page_info(_il, ignore_urls)
+                if not _il_page_info:
+                    continue
                 _random_sleep()
-       
+                for _il_source, _il_value in _il_page_info.iteritems():
+                    #print _il_value['content']
+                    #print _il_source, _il_value['author'], _il_value['post_date'], _il_value['title'], ','.join(_il_value['inside_links'])
+                    logger.info(_il_source)
+                    _a=_il_value['author']
+                    _s=_il_source
+                    _d=_il_value['post_date']
+                    _t=_il_value['title']
+                    _l=','.join(_il_value['inside_links'])
+                    _c=_il_value['content']
+                    _db_insert_one_post(_a,_d,_t,_s,_c,_l)
+                    _random_sleep()
+
+def main():
+    if len(sys.argv) != 2:
+        print "feeddb.py <dbname>"
+        return
+
+    DB=sys.argv[1]
+    dbutil_setup_db(DB)
+    processed = dbutil_get_processed_url_list(DB)
+    crawler_task_start(ignored=processed)
+
+if __name__ == "__main__" :
+    main()
+
