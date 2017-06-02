@@ -41,7 +41,7 @@ def _convert_short_to_ori_url(short_url):
         else:
             return '[=]:%s'%ori_url
         """
-    except e:
+    except Exception as e:
         #print short_url, 'no change'
         logger.error(e)
         return -1, ori_url
