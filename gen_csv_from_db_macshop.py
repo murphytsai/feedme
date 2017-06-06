@@ -10,6 +10,7 @@ import re
 import sqlite3
 import logging
 import argparse
+import click
 from termcolor import colored
 
 logging.basicConfig(level=logging.WARNING)
@@ -46,7 +47,14 @@ def get_price(content):
             if keyword in line:
                 return line
 
-def gen_csv_from_db(db_path, output_name):
+@click.command()
+#@click.argument('--db_path')
+#@click.argument('--output_name')
+@click.option('--db_path', default='db.sqlite', help="sqlite db path")
+@click.option('--output_name', default='db.csv', help='csv file path')
+@click.option('--loglevel', default='warning', help='log level (default:warning)')
+def gen_csv_from_db(db_path, output_name, loglevel):
+    print loglevel
     scanlog={}
     DB=db_path
     conn=sqlite3.connect(DB)
@@ -107,6 +115,8 @@ def gen_csv_from_db(db_path, output_name):
             util_perf_analyze_log(scanlog)
 
 if __name__ == "__main__":
+    gen_csv_from_db()
+    '''
     parser = argparse.ArgumentParser(prog='gen_csv_from_db', description="generate csv by sqlite db")
     parser.add_argument('--log-lvl', '--lvl', help="change log verbosity", dest="loglevel", choices=["DEBUG","INFO","WARNING","ERROR"], default="WARNING")
     parser.add_argument('-i', '--input', dest='db_path', help="/from/to/sqlite.db", default="db.sqlite")
@@ -130,3 +140,4 @@ if __name__ == "__main__":
     print colored(style.BOLD + 'db_path=%s' + style.END, 'green') % db_path
     print colored(style.BOLD + 'output_name=%s' + style.END, 'red') % output_name
     gen_csv_from_db(db_path, output_name)
+    '''
